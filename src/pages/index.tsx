@@ -12,14 +12,27 @@ type PostProps = {
 const Post = ({ post }: PostProps) => {
   const { id, content } = post;
 
+  const ctx = api.useContext();
+
+  const { mutate: deleteMutation } = api.post.delete.useMutation({
+    onSettled: async () => {
+      await ctx.post.getAll.invalidate();
+    },
+  });
+
   return (
     <div className="p-4 text-center" key={id}>
-      <div className="card w-96 bg-base-100 shadow-xl">
+      <div className="card w-96 bg-base-100 bg-slate-800 shadow-xl">
         <div className="card-body">
           <h2 className="card-title">Post</h2>
           <p>{content}</p>
           <div className="card-actions justify-end">
-            <button className="btn-primary btn">Delete</button>
+            <button
+              className="btn-primary btn"
+              onClick={() => deleteMutation(id)}
+            >
+              Delete
+            </button>
           </div>
         </div>
       </div>
@@ -62,7 +75,7 @@ const CreatePost = () => {
     >
       <input
         type="text"
-        placeholder="Type here"
+        placeholder="Create a post ..."
         className="input-bordered input w-full max-w-xs"
         value={input}
         onChange={(e) => setInput(e.target.value)}
@@ -85,7 +98,9 @@ const Home: NextPage = () => {
       <div className="flex w-full flex-col items-center">
         <h1 className="text-5xl">T3 Daisy Crud</h1>
         <AuthShowcase />
+        <br></br>
         <CreatePost />
+        <br></br>
         <Posts />
       </div>
     </>
@@ -97,16 +112,10 @@ export default Home;
 const AuthShowcase: React.FC = () => {
   const { data: sessionData } = useSession();
 
-  const { data: secretMessage } = api.example.getSecretMessage.useQuery(
-    undefined, // no input
-    { enabled: sessionData?.user !== undefined }
-  );
-
   return (
     <div className="flex flex-col items-center justify-center gap-4">
       <p className="text-center text-2xl">
         {sessionData && <span>Logged in as {sessionData.user?.name}</span>}
-        {secretMessage && <span> - {secretMessage}</span>}
       </p>
       <button
         className="rounded-full px-10 py-3 font-semibold no-underline transition"
