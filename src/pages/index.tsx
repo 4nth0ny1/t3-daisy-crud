@@ -85,9 +85,20 @@ const CreatePost = () => {
   );
 };
 
-const Home: NextPage = () => {
-  const hello = api.example.hello.useQuery({ text: "from tRPC" });
+const Navbar = () => {
+  return (
+    <div className="navbar bg-base-100">
+      <div className="flex-1">
+        <a className="btn-ghost btn text-2xl normal-case">T3 Daisy Crud</a>
+      </div>
+      <div className="flex-none">
+        <AuthShowcase />
+      </div>
+    </div>
+  );
+};
 
+const Home: NextPage = () => {
   return (
     <>
       <Head>
@@ -96,8 +107,7 @@ const Home: NextPage = () => {
         <link rel="icon" href="/favicon.ico" />
       </Head>
       <div className="flex w-full flex-col items-center">
-        <h1 className="text-5xl">T3 Daisy Crud</h1>
-        <AuthShowcase />
+        <Navbar />
         <br></br>
         <CreatePost />
         <br></br>
@@ -113,12 +123,12 @@ const AuthShowcase: React.FC = () => {
   const { data: sessionData } = useSession();
 
   return (
-    <div className="flex flex-col items-center justify-center gap-4">
-      <p className="text-center text-2xl">
-        {sessionData && <span>Logged in as {sessionData.user?.name}</span>}
+    <div className="flex flex-row items-center justify-center gap-4 p-4">
+      <p className="text-center text-xl">
+        {sessionData && <span>{sessionData.user?.name}</span>}
       </p>
       <button
-        className="rounded-full px-10 py-3 font-semibold no-underline transition"
+        className="btn-accent btn rounded-full px-4 py-3 font-semibold no-underline transition"
         onClick={sessionData ? () => void signOut() : () => void signIn()}
       >
         {sessionData ? "Sign out" : "Sign in"}
