@@ -3,14 +3,14 @@ import { signIn, signOut, useSession } from "next-auth/react";
 import Head from "next/head";
 import { api } from "~/utils/api";
 import type { Post } from "../types";
-import { useState } from "react";
+import { type FC, useState } from "react";
 
 type PostProps = {
   post: Post;
 };
 
 const Post = ({ post }: PostProps) => {
-  const { id, content } = post;
+  const { id, content, title } = post;
 
   const ctx = api.useContext();
 
@@ -24,7 +24,7 @@ const Post = ({ post }: PostProps) => {
     <div className="p-4 text-center" key={id}>
       <div className="card w-96 bg-base-100 bg-slate-800 shadow-xl">
         <div className="card-body">
-          <h2 className="card-title">Post</h2>
+          <h2 className="card-title">{title}</h2>
           <p>{content}</p>
           <div className="card-actions justify-end">
             <button
@@ -53,15 +53,27 @@ const Posts = () => {
   );
 };
 
-const CreatePost = () => {
-  const [input, setInput] = useState("");
+const CreatePost: FC = () => {
+  const [title, setTitle] = useState("");
+  const [content, setContent] = useState("");
 
   const ctx = api.useContext();
 
-  const { mutate } = api.post.create.useMutation({
+  const postEntry = api.post.create.useMutation({
+    onMutate: async (newEntry) => {
+      await ctx.post.getAll.cancel();
+      ctx.post.getAll.setData((prevEntries) => {
+        if (prevEntries) {
+          return [newEntry, ...prevEntries];
+        } else {
+          return [newEntry];
+        }
+      });
+    },
     onSettled: async () => {
       await ctx.post.getAll.invalidate();
-      setInput("");
+      setTitle("");
+      setContent("");
     },
   });
 
@@ -70,15 +82,27 @@ const CreatePost = () => {
       className="flex flex-row gap-4"
       onSubmit={(e) => {
         e.preventDefault();
-        mutate(input);
+        postEntry.mutate({
+          title,
+          content,
+        });
       }}
     >
       <input
         type="text"
+        placeholder="Add a title"
+        className="input-bordered input w-full max-w-xs"
+        name="title"
+        value={title}
+        onChange={(e) => setTitle(e.target.value)}
+      />
+      <input
+        type="text"
         placeholder="Create a post ..."
         className="input-bordered input w-full max-w-xs"
-        value={input}
-        onChange={(e) => setInput(e.target.value)}
+        name="content"
+        value={content}
+        onChange={(e) => setContent(e.target.value)}
       />
       <button className="btn-primary btn">post</button>
     </form>

@@ -7,6 +7,6 @@ type allPostsOutput = RouterOutputs['post']['getAll']
 
 export type Post = allPostsOutput[number]
 
-export const postInput = z.string({
-    required_error: 'Describe your post'
-}).min(1).max(50)
+// export const postInput = z.object({
+//     required_error: 'Describe your post'
+// }).min(1).max(50)
