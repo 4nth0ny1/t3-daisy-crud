@@ -2,6 +2,34 @@ import { type NextPage } from "next";
 import { signIn, signOut, useSession } from "next-auth/react";
 import Head from "next/head";
 import { api } from "~/utils/api";
+import type { Post } from "../types";
+
+type PostProps = {
+  post: Post;
+};
+
+const Post = ({ post }: PostProps) => {
+  const { id, content } = post;
+
+  return (
+    <div className="text-xl" key={id}>
+      <p>{content}</p>
+    </div>
+  );
+};
+
+const Posts = () => {
+  const { data: posts, isLoading } = api.post.getAll.useQuery();
+
+  if (isLoading) return <div>Loading...</div>;
+  return (
+    <div>
+      {posts?.map((post) => (
+        <Post key={post.id} post={post} />
+      ))}
+    </div>
+  );
+};
 
 const Home: NextPage = () => {
   const hello = api.example.hello.useQuery({ text: "from tRPC" });
@@ -16,6 +44,7 @@ const Home: NextPage = () => {
       <div className="text-center">
         <h1 className="text-5xl">T3 Daisy Crud</h1>
         <AuthShowcase />
+        <Posts />
       </div>
     </>
   );
