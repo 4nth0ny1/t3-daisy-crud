@@ -11,7 +11,11 @@ export const postRouter = createTRPCRouter({
 
 
   getAll: publicProcedure.query(async ({ ctx }) => {
-    const posts = await ctx.prisma.post.findMany()
+    const posts = await ctx.prisma.post.findMany({
+      include: {
+        likes: true
+      }
+    })
     return posts
   }),
 

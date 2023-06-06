@@ -10,7 +10,8 @@ type PostProps = {
 };
 
 const Post = ({ post }: PostProps) => {
-  const { id, content, title } = post;
+  const { id, content, title, likes } = post;
+  console.log(post);
 
   const ctx = api.useContext();
 
@@ -26,7 +27,11 @@ const Post = ({ post }: PostProps) => {
         <div className="card-body">
           <h2 className="card-title">{title}</h2>
           <p>{content}</p>
+
           <div className="card-actions justify-end">
+            <p className="flex flex-row justify-start pt-6">
+              Likes: {likes.length}
+            </p>
             <button
               className="btn-primary btn"
               onClick={() => deleteMutation(id)}
