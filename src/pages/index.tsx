@@ -3,6 +3,7 @@ import { signIn, signOut, useSession } from "next-auth/react";
 import Head from "next/head";
 import { api } from "~/utils/api";
 import type { Post } from "../types";
+import { useState } from "react";
 
 type PostProps = {
   post: Post;
@@ -31,6 +32,37 @@ const Posts = () => {
   );
 };
 
+const CreatePost = () => {
+  const [input, setInput] = useState("");
+
+  const ctx = api.useContext();
+
+  const { mutate } = api.post.create.useMutation({
+    onSettled: async () => {
+      await ctx.post.getAll.invalidate();
+      setInput("");
+    },
+  });
+
+  return (
+    <form
+      onSubmit={(e) => {
+        e.preventDefault();
+        mutate(input);
+      }}
+    >
+      <input
+        type="text"
+        placeholder="Type here"
+        className="input-bordered input w-full max-w-xs"
+        value={input}
+        onChange={(e) => setInput(e.target.value)}
+      />
+      <button className="btn-primary btn">post</button>
+    </form>
+  );
+};
+
 const Home: NextPage = () => {
   const hello = api.example.hello.useQuery({ text: "from tRPC" });
 
@@ -44,6 +76,7 @@ const Home: NextPage = () => {
       <div className="text-center">
         <h1 className="text-5xl">T3 Daisy Crud</h1>
         <AuthShowcase />
+        <CreatePost />
         <Posts />
       </div>
     </>

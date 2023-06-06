@@ -1,9 +1,11 @@
 import { z } from "zod";
 import {
   createTRPCRouter,
+  protectedProcedure,
   publicProcedure,
 
 } from "~/server/api/trpc";
+import {postInput} from '../../../types'
 
 export const postRouter = createTRPCRouter({
 
@@ -12,5 +14,18 @@ export const postRouter = createTRPCRouter({
     const posts = await ctx.prisma.post.findMany()
     return posts
   }),
+
+  create: protectedProcedure.input(postInput).mutation(async ({ctx, input}) => {
+    return await ctx.prisma.post.create({
+      data: {
+        content: input, 
+        user: {
+          connect: {
+            id: ctx.session.user.id
+          }
+        }
+      }
+    })
+  })
 
 });
